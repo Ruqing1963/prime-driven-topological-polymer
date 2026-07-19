@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+title: "Prime-Driven Topological Polymer (PDTP)"
+message: "If you use this software or data, please cite it as below."
+authors:
+  - family-names: Chen
+    given-names: Ruqing
+    affiliation: "GUT Geoservice Inc., Montreal, Quebec, Canada"
+    email: ruqing@hotmail.com
+repository-code: "https://github.com/Ruqing1963/prime-driven-topological-polymer"
+license: MIT
