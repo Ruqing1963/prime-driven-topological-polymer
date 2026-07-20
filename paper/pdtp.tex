@@ -13,7 +13,7 @@
 prime gaps imprint on the 3D conformation of a self-avoiding polymer}
 \author[1]{Ruqing Chen\thanks{Corresponding author: \texttt{ruqing@hotmail.com}}}
 \affil[1]{GUT Geoservice Inc., Montreal, Quebec, Canada}
-\date{\today}
+\date{\normalsize Version~2.0 (mechanism-falsification update)\\[3pt]\today}
 
 \begin{document}
 \maketitle
@@ -40,8 +40,23 @@ imprint is quantitatively modest ($\sim\!1\%$ of the radial-rank variance) but
 statistically robust and reproducible across system sizes, demonstrating that
 deterministic arithmetic order leaves a measurable trace on three-dimensional
 structure---one that survives the entropically favored radial sorting of the
-collapse.
+collapse. Scale-selective surrogate tests (a block shuffle and its converse, a
+local scramble) further localize this order: the imprint is destroyed by global
+rearrangement yet wholly preserved under complete \emph{local} scrambling within
+windows of up to ${\sim}10^{2}$ consecutive gaps, revealing that the driver is an
+irreducible, \emph{macroscopic} long-range arithmetic correlation of length
+$\xi \approx 3.5\times10^{2}$ gaps (${\approx}30\%$ of the sequence) and
+falsifying the local-cluster (\emph{topological-trap}) hypothesis of version~1.
 \end{abstract}
+
+\noindent\emph{Note (Version~2.0).}~This revision supersedes version~1.0. The
+mechanism proposed there---that local twin-prime clusters act as \emph{topological
+traps}---has since been tested and \emph{falsified} by two new scale-selective
+surrogate experiments (the S4 block shuffle and the S5 local scramble), which
+instead localize the ordering to a macroscopic correlation length
+$\xi \approx 3.5\times10^{2}$ gaps (Sec.~\ref{sec:scissors}). The abstract,
+Sec.~\ref{sec:scissors}, and the Conclusion are updated accordingly; all
+version~1.0 data and results stand unchanged.
 
 \section{Introduction}
 
@@ -101,7 +116,7 @@ trajectories---that the arithmetic ordering does leave a small but statistically
 robust signature, invisible in gross morphology and in marginal-matched nulls, yet
 detectable in the rank organization of the collapse.
 
-\section{Model definition}
+\section{Model definition}\label{sec:model}
 
 \subsection{Prime skeleton and gap extraction}
 We identify the beads of a chain of length $N$ with the integers
@@ -303,7 +318,7 @@ individual runs.}
 \label{fig:decisive}
 \end{figure}
 
-\subsection{Ordering versus marginal distribution}
+\subsection{Ordering versus marginal distribution}\label{sec:decomp}
 To attribute the effect we compare three arms at $N = 10^4$, $n = 40$: the true
 chain; the Shuffle (S1), preserving the exact gap multiset but randomizing order; and
 a Cram\'er surrogate (S3), placing pseudo-primes at density $1/\ln i$, preserving only
@@ -375,24 +390,118 @@ a physical readout sensitive not to the composition of the stiffness sequence bu
 its sequential arrangement---specifically to correlations that a random permutation
 destroys.
 
-\subsection{A candidate mechanism}
-Why should ordering matter once the chain has collapsed? We advance a concrete,
-falsifiable hypothesis. In the true sequence the long gaps are not placed
-independently: prime gaps carry documented correlations and
-clustering~\cite{HardyLittlewood,AresCastro}, superposed on a weak positional drift.
-We conjecture that this correlated placement embeds a fraction of the rigid rods
-within flexible neighborhoods, impeding their migration to the surface and thereby
-\emph{reducing} the stiffness--radius correlation relative to a sequence in which the
-identical rods are scattered independently. Concretely, the abundance of small gaps
----twin primes (gap $2$) alone account for ${\approx}14\%$ of all gaps at
-$N = 4\times10^4$---creates local clusters of flexible hinges~\cite{HardyLittlewood},
-which we hypothesize act as \emph{topological traps} that anchor neighboring rigid
-rods within the interior and oppose their radial expulsion. The hypothesis is directly testable with
-scale-selective surrogates---for instance a block-preserving permutation that retains
-local gap order within contiguous segments while scrambling their large-scale
-arrangement, and its converse---which would localize the correlation length
-responsible for the signal. The present data establish that ordering matters, not yet
-how.
+\subsection{Falsification of the local-trap hypothesis and the emergence of
+macroscopic order}
+\label{sec:scissors}
+
+In version~1.0 of this work we advanced a concrete, falsifiable hypothesis for the
+ordering signature of Sec.~\ref{sec:decomp}. Observing that dense clusters of small
+gaps---twin primes (gap $2$) alone account for ${\approx}14\%$ of all
+gaps~\cite{HardyLittlewood}---we conjectured that these clusters act as \emph{local
+topological traps}, anchoring neighbouring rigid rods within the collapsed interior
+and thereby \emph{reducing} the stiffness--radius rank correlation $\rho$ below that
+of an order-randomized shuffle. This hypothesis carries a sharp, testable prediction:
+the correlation length responsible for the signal must be \emph{short}, so that
+preserving gap order over modest contiguous windows already suffices to reproduce the
+true-chain suppression. We have now tested that prediction directly---with the
+scale-selective surrogates anticipated in version~1---and find it false.
+
+We introduce a complementary pair of surrogates---a ``scissors'' test---each of which
+preserves the gap multiset \emph{exactly} (and hence the marginal stiffness
+distribution of the shuffle S1), differing only in the scale at which sequential
+order is destroyed. Partition the ordered prime-gap sequence into contiguous blocks
+of length $L$ (measured in gaps). The \emph{block shuffle} (S4) retains the gap order
+\emph{within} each block but randomizes the arrangement \emph{of} the blocks,
+destroying long-range order while preserving local order; it interpolates from S1 at
+$L=1$ to the true chain at $L \ge n_{\mathrm{gap}}$. The \emph{local scramble} (S5)
+performs the converse operation---it holds the blocks in their true global positions
+but randomizes the gaps \emph{within} each block, destroying local order while
+preserving the large-scale arrangement---and interpolates from the true chain at
+$L=1$ to S1 at $L \ge n_{\mathrm{gap}}$. Both are evaluated on the common axis
+$f(L) \equiv (\rho_{\mathrm{S1}}-\rho)/(\rho_{\mathrm{S1}}-\rho_{\mathrm{true}})$,
+with $f=0$ shuffle-like and $f=1$ true-like. All arms use $N=10^{4}$, $n=40$, and the
+annealing protocol of Sec.~\ref{sec:model} (Table~\ref{tab:params}), so that each
+surrogate is directly comparable to the true and S1 ensembles of
+Sec.~\ref{sec:decomp}.
+
+The two blades give opposite and decisive answers (Fig.~\ref{fig:scissors}).
+Destroying \emph{long-range} order abolishes the signal at every scale probed: S4 is
+statistically indistinguishable from the shuffle for all $L \in \{10,50,100,500\}$
+(S4 vs.\ S1: $p \ge 0.10$, $|d| \le 0.38$), never descending toward the true chain.
+Destroying \emph{local} order, by contrast, leaves the signal fully intact: at $L=50$
+and $L=100$ the local scramble reproduces the true chain to within noise (S5 vs.\
+true: $\rho = -0.025 \pm 0.010$, $p = 0.91$, $d = -0.03$; and
+$\rho = -0.029 \pm 0.008$, $p = 0.62$, $d = -0.11$), while differing from the shuffle
+at the \emph{full} strength of the original ordering effect ($d = -1.07$ and
+$d = -1.37$; $p = 1.3\times10^{-5}$ and $5.8\times10^{-8}$)---an effect size matching
+the $d = -1.05$ of the primary true-vs-shuffle contrast (Sec.~\ref{sec:decomp}). The
+imprint thus survives complete randomization of gap order within windows of one
+hundred consecutive gaps---windows that shred every twin- and cousin-prime cluster in
+place---yet vanishes the instant the large-scale arrangement of those windows is
+disturbed.
+
+This constitutes a clean falsification. Local order is neither \emph{sufficient}
+(S4 retains it and the signal dies) nor \emph{necessary} (S5 destroys it and the
+signal persists) to reproduce the true-chain suppression. The local topological-trap
+mechanism conjectured in version~1 is therefore excluded as the driver at $N=10^{4}$.
+The result simultaneously sharpens the decomposition of Sec.~\ref{sec:decomp}: the
+Cram\'er surrogate S3, which retains only the coarse $1/\ln i$ density
+trend~\cite{Cramer}, does \emph{not} reproduce the true chain
+($\rho_{\mathrm{S3}} = +0.045$, statistically near S1), whereas S5, which retains the
+true \emph{correlated} arrangement on scales $\gtrsim L$, does. What the fold
+registers is thus neither the marginal composition of the gap sequence nor its fine
+local texture, but its genuine long-range arithmetic order.
+
+Because the local-scramble blade is free of the combinatorial starvation that
+inflates the variance of S4 at large $L$ (at $L=500$ only three blocks remain, and
+the block-permutation ensemble collapses to $3! = 6$ arrangements), it further
+permits a direct estimate of the correlation length. The retention
+$f_{\mathrm{S5}}(L)$ falls from unity through half-maximal at $L = \xi$, giving
+\begin{equation}
+  \xi \;\approx\; 3.5 \times 10^{2}\ \text{gaps}
+  \qquad (\text{$68\%$ CI } [1.8,\,4.9]\times10^{2}),
+  \label{eq:xi}
+\end{equation}
+a scale spanning ${\approx}30\%$ of the $n_{\mathrm{gap}} = 1228$-gap sequence at
+$N=10^{4}$. The order responsible for the topological imprint is, in this precise
+sense, \emph{macroscopic}: it resides not in the neighbourhood of any individual
+prime but across a finite fraction of the entire progression sampled. We note that
+$\xi$ exceeds the few-lag range over which prime-gap pair-clustering is
+concentrated~\cite{AresCastro}, indicating that the fold responds to correlations
+beyond nearest-neighbour clustering.
+
+Two caveats bound this conclusion. First, $\xi$ is estimated from a four-point
+retention curve at a single size; the wide interval in Eq.~\eqref{eq:xi} reflects
+this, and a finer S5 sweep over $L \in [150, 800]$ would tighten it. Second, and more
+consequential, whether $\xi$ grows in proportion to $N$---the hallmark of scale-free
+long-range order---or saturates at a fixed number of gaps---a genuine finite
+correlation length---cannot be decided from a single $N$; resolving this dichotomy is
+the central question the present result raises. We also record a mild,
+sub-significant over-suppression by S5 at the smallest window ($L=10$:
+$\rho = -0.046 \pm 0.009$, $d = -0.39$ vs.\ true, $p = 0.089$), consistent either with
+statistical fluctuation or with a weak counteracting role of the finest local order.
+Within these bounds the physical picture that replaces the local trap is unambiguous
+in direction: the true prime sequence stamps a residue of \emph{macroscopic}
+arithmetic order onto the folded conformation, and it is this long-range
+structure---not local clustering---that the polymer reads. In the language of
+version~1's closing sentence, which held that ``ordering matters, not yet how,'' we
+can now state that the \emph{how} is macroscopic.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.82\linewidth]{fig5_scissors.pdf}
+\caption{The S4/S5 scissors at $N=10^{4}$, $n=40$ per arm. Spearman $\rho$
+(stiffness vs.\ radius) against block length $L$, with the true-prime and shuffle
+(S1) reference bands (mean $\pm$ s.e.m.). \textbf{S4} (block shuffle; destroy global
+order, keep local) remains statistically pinned to the shuffle band at every $L$
+(vs.\ S1: $p \ge 0.10$). \textbf{S5} (local scramble; destroy local order, keep
+global) remains pinned to the true-prime band up to $L \approx 10^{2}$ (vs.\ true at
+$L=50,100$: $p = 0.91, 0.62$) and departs toward the shuffle only for
+$L \gtrsim \xi$. The two blades cross near the half-retention scale
+$\xi \approx 3.5\times10^{2}$ gaps (shaded, $68\%$ CI $[1.8,4.9]\times10^{2}$), the
+correlation length over which the core--shell ordering collapses.}
+\label{fig:scissors}
+\end{figure}
 
 \subsection{Connections}
 Our result offers a physical manifestation of the fact that the prime-gap sequence is
@@ -442,13 +551,29 @@ $p = 6.5\times10^{-5}$, $d = -0.96$), an effect a three-way decomposition attrib
 arithmetic ordering rather than to the gap distribution, and reproducible across sizes
 once statistics and annealing depth are controlled. The effect is quantitatively
 modest ($\sim\!1\%$ of the radial-rank variance) and is a property of the ensemble
-rather than of any single fold. Beyond the specific case of primes, the PDTP framework
-and its surrogate-null methodology offer a controlled testbed for how one-dimensional
-deterministic order is---and is not---expressed in three-dimensional structure. The
-most immediate directions are to resolve the correlation scale responsible for the
-signal through scale-selective surrogates, to map the effect across the stiffness-map
-parameter space, and to determine its fate at system sizes well beyond those reached
-here.
+rather than of any single fold. Version~2.0 resolves the mechanism left open in version~1. Two scale-selective
+surrogates act as a \emph{scissors} on the correlation length: a block shuffle (S4),
+which destroys long-range order while preserving local order, and its converse, a
+local scramble (S5), which preserves the global arrangement while destroying local
+order (Sec.~\ref{sec:scissors}, Fig.~\ref{fig:scissors}). The two blades give opposite
+and decisive verdicts. Destroying \emph{local} order leaves the ordering signature
+fully intact---S5 is statistically indistinguishable from the true chain for windows
+up to ${\sim}10^{2}$ gaps ($p = 0.62$--$0.91$)---whereas destroying \emph{global}
+order abolishes it, S4 remaining indistinguishable from the shuffle at every scale
+($p \ge 0.10$). Local order is therefore neither sufficient nor necessary to
+reproduce the signal, and the local-cluster ``topological-trap'' hypothesis is ruled
+out: the imprint is driven not by twin-prime clustering but by an irreducible,
+\emph{macroscopic} long-range arithmetic correlation of length
+$\xi \approx 3.5\times10^{2}$ gaps---a scale spanning ${\approx}30\%$ of the sequence.
+The correlation scale responsible for the signal, identified as the most immediate
+open question in version~1, is thus now measured. Beyond the specific case of primes,
+the PDTP framework and its surrogate-null methodology offer a controlled testbed for
+how one-dimensional deterministic order is---and is not---expressed in
+three-dimensional structure. The remaining frontier is the scaling of $\xi$ with
+system size---whether it grows in proportion to $N$, the signature of scale-free
+long-range order, or saturates at a fixed gap count, a genuine finite correlation
+length---together with the robustness of the effect across the stiffness-map
+parameter space.
 
 \section*{Data and code availability}
 All code, data, and figure-generation scripts that reproduce the results of this paper
@@ -457,7 +582,10 @@ are openly available at
 contains the pre-flight calibration, the surrogate/null-model decomposition, the
 finite-size sweep, the decisive $N = 4\times10^4$ experiment, and the conformation
 generator, together with the ensemble result files and a script that regenerates all
-figures.
+figures. Version~2.0 additionally provides the two scale-selective surrogate
+drivers---the block shuffle (\texttt{block\_shuffle\_test.py}, S4) and the local
+scramble (\texttt{block\_local\_scramble\_test.py}, S5)---with their $N = 10^4$
+ensembles and the scissors figure.
 
 \begin{thebibliography}{99}
 \bibitem{deGennes} P.-G. de Gennes, \emph{Scaling Concepts in Polymer Physics}
