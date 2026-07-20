@@ -7,4 +7,12 @@ authors:
     affiliation: "GUT Geoservice Inc., Montreal, Quebec, Canada"
     email: ruqing@hotmail.com
 repository-code: "https://github.com/Ruqing1963/prime-driven-topological-polymer"
+version: 2.0.0
+date-released: 2026-07-19
+keywords:
+  - prime gaps
+  - polymer folding
+  - long-range correlations
+  - surrogate null models
+  - aperiodic order
 license: MIT
