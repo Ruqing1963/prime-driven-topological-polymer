@@ -1,0 +1,788 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{cmap}            % ToUnicode CMaps: makes fi/ff/ffi ligatures copyable/searchable
+\usepackage[T1]{fontenc}
+\IfFileExists{lmodern.sty}{\usepackage{lmodern}}{} % Type-1 Latin Modern if available
+\input{glyphtounicode}
+\pdfgentounicode=1
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{authblk}
+\usepackage[hidelinks]{hyperref}
+\graphicspath{{./}{../figures/}}
+
+\title{\bfseries Beyond the marginal distribution: long-range correlations in
+prime gaps imprint on the 3D conformation of a self-avoiding polymer}
+\author[1]{Ruqing Chen\thanks{Corresponding author: \texttt{ruqing@hotmail.com}}}
+\affil[1]{GUT Geoservice Inc., Montreal, Quebec, Canada}
+\date{\normalsize Version~3.0 (consistency, protocol-dependence, and reporting revision)\\[3pt]\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The folding of a heteropolymer is governed by its monomer sequence, yet the
+intermediate regime between periodic and random sequences---those that are
+aperiodic but deterministic---remains largely unexplored. We introduce the
+Prime-Driven Topological Polymer (PDTP), a coarse-grained self-avoiding chain in
+which the local bending stiffness is set by an exponential map of the local prime
+gap, so that dense prime clusters act as flexible hinges and the long inter-prime
+runs as rigid rods. Using overdamped Langevin dynamics with simulated annealing,
+we ask whether the folded state is fixed by the composition of this sequence or by
+its arithmetic ordering. To separate the two, we compare the true prime chain
+against surrogates that preserve the marginal stiffness distribution exactly while
+destroying sequential order. The gross conformation is surrogate-invariant:
+neither the radius of gyration nor the tail-weighted core--shell amplitude
+distinguishes the true chain from a shuffle. The finer organization does: the
+Spearman correlation between stiffness and radial position is significantly
+suppressed for the true sequence ($\rho = +0.105$ vs.\ $+0.137$ at
+$N = 4\times10^{4}$; $p = 6.5\times10^{-5}$, $d = -0.96$), an effect a
+decomposition attributes to ordering rather than to the gap distribution. The
+imprint is quantitatively modest ($\sim\!1\%$ of the radial-rank variance) but
+statistically robust and reproducible across system sizes, demonstrating that
+deterministic arithmetic order leaves a measurable trace on three-dimensional
+structure---one that survives the entropically favored radial sorting of the
+collapse. Scale-selective surrogate tests (a block shuffle and its converse, a
+local scramble) further localize this order: the imprint is destroyed by global
+rearrangement yet wholly preserved under complete \emph{local} scrambling within
+windows of up to ${\sim}10^{2}$ consecutive gaps, revealing that the driver is an
+irreducible, \emph{macroscopic} long-range arithmetic correlation of length
+$\xi \approx 3.5\times10^{2}$ gaps (${\approx}30\%$ of the sequence, under the
+reference annealing protocol; $\xi$ is a protocol-conditioned observable of the
+annealed ensemble) and falsifying the local-cluster (\emph{topological-trap})
+hypothesis of version~1.
+\end{abstract}
+
+\noindent\emph{Note (Version~2.0).}~This revision supersedes version~1.0. The
+mechanism proposed there---that local twin-prime clusters act as \emph{topological
+traps}---has since been tested and \emph{falsified} by two new scale-selective
+surrogate experiments (the S4 block shuffle and the S5 local scramble), which
+instead localize the ordering to a macroscopic correlation length
+$\xi \approx 3.5\times10^{2}$ gaps (Sec.~\ref{sec:scissors}). The abstract,
+Sec.~\ref{sec:scissors}, and the Conclusion are updated accordingly; all
+version~1.0 data and results stand unchanged.
+
+\medskip
+\noindent\emph{Note (Version~3.0).}~This is a reporting and consistency revision:
+no version~2.0 datum is altered, and no new production ensemble is introduced.
+The changes are: (i)~the error-bar convention (mean $\pm$ s.e.m.) is now stated
+explicitly; (ii)~the annealing depth of every ensemble is recorded in the
+corresponding figure caption, in absolute steps and in steps per bead, resolving
+the apparent discrepancy between the $N=10^{4}$ points of
+Figs.~\ref{fig:decomp} and~\ref{fig:fss}; (iii)~the correlation length $\xi$ of
+Eq.~\eqref{eq:xi} is now explicitly identified as a \emph{protocol-conditioned}
+observable of the annealed ensemble, and a note added in proof reports that a
+deeper-annealed re-measurement in follow-up work shifts its value upward at fixed
+$N$ while leaving the macroscopic-order conclusion intact
+(Sec.~\ref{sec:scissors}); (iv)~the construction-level coupling between segment
+length and segment stiffness, and the treatment of the chain-end boundary
+segments, are now stated explicitly in Sec.~\ref{sec:model}; (v)~the reduced
+statistical power of the $R_g$ comparison ($n=10$) is flagged
+(Sec.~\ref{sec:global}); (vi)~the code and data are now archived with a
+persistent DOI (Data availability); and (vii)~the Introduction and Sec.~5.3 now
+engage prior art that version~2.0 omitted---correlated-sequence random
+heteropolymers, the conformation-dependent (``protein-like'') sequence-design
+programme and its L\'evy-flight sequence correlations, Fibonacci-sequence molecular
+chains, the proposal of polymeric compaction as a probe of sequence correlations,
+and the effective limit-periodicity/hyperuniformity of the primes---and position
+the present contribution relative to each.
+
+\section{Introduction}
+
+The folding of a heteropolymer into a compact, organized state is a canonical
+problem of soft-matter physics, underlying phenomena from protein structure to
+chromatin architecture~\cite{deGennes,LiebermanAiden}. A primary determinant of
+the emergent morphology is the monomer sequence---the one-dimensional arrangement
+of chemically or mechanically distinct units along the
+backbone~\cite{Pande}. Two limiting classes of sequence have been studied in
+depth. At one extreme lie deterministic \emph{periodic} sequences, epitomized by
+block copolymers, whose translational symmetry drives microphase separation into
+lamellar, cylindrical, and related ordered mesophases~\cite{Leibler,Bates}. At the
+other extreme lie \emph{random} heteropolymers, in which the sequence is a quenched
+realization of uncorrelated disorder and the folding landscape is governed by
+frustration and glassy statistics~\cite{Bryngelson,Garel}. Between these poles lies
+a comparatively unexplored regime: sequences that are neither periodic nor random,
+but \emph{aperiodic and deterministic}, carrying long-range correlations of purely
+structural origin. This intermediate regime is not empty: analytic work on random
+heteropolymers with power-law-correlated sequences indicates that long-range sequence
+correlations qualitatively reshape the folding landscape~\cite{Mamasakhlisov}, the
+conformation-dependent sequence-design programme showed that globule-derived
+``protein-like'' sequences carry L\'evy-flight-type long-range
+correlations coupled to core--shell organization~\cite{KhokhlovKhalatur,Govorun},
+and deterministic aperiodic (Fibonacci) sequences have been mapped onto molecular
+chains and their conformational scaling examined~\cite{Azevedo}. What has been
+lacking is a \emph{controlled attribution}: a demonstration, against nulls that
+preserve the marginal composition exactly, that the sequential \emph{ordering} of a
+deterministic aperiodic sequence---as opposed to its composition---leaves a
+measurable imprint on the three-dimensional conformation of a collapsed chain. That
+is the gap this paper addresses.
+
+Number theory has repeatedly furnished physics with precisely this kind of
+structured aperiodicity. The statistics of the nontrivial zeros of the Riemann
+zeta function coincide with the spectral fluctuations of random-matrix ensembles,
+forming a celebrated bridge between arithmetic and quantum
+spectra~\cite{Montgomery,BerryKeating}. In real space, aperiodic tilings and
+quasicrystals demonstrate that deterministic, non-periodic order can generate sharp
+diffraction and hierarchical organization absent from both crystals and
+glasses~\cite{Shechtman,Levine}. The sequence of prime numbers occupies a
+distinctive place in this landscape: it is fully deterministic yet globally
+aperiodic, its coarse density decays only logarithmically as dictated by the prime
+number theorem, and its local structure---encoded in the sequence of prime gaps
+$g_i$, the distances between consecutive primes---carries well-documented
+correlations that are neither periodic nor memoryless~\cite{HardyWright,Cramer}.
+Indeed, viewed as a one-dimensional point pattern, the primes in suitable large
+intervals were recently shown to be \emph{effectively limit-periodic} and
+hyperuniform, exhibiting genuine multiscale order in their structure
+factor~\cite{Torquato2018,Torquato2019}---independent evidence that the prime
+sequence carries macroscopic order of the kind a physical system might register.
+These properties make the prime-gap sequence a natural candidate for a designed,
+deterministic constraint to be mapped onto physical space, in the same spirit that
+quasiperiodic order has been imprinted onto photonic and mechanical
+metamaterials~\cite{Macia}.
+
+We realize this mapping mechanically. In the Prime-Driven Topological Polymer
+(PDTP), each bead $i$ of a coarse-grained bead--spring chain is assigned a local
+bending stiffness that is an exponential function of its prime gap [Eq.~(1)]. Dense
+clusters of primes (short gaps) become flexible hinges, while the rare long gaps
+become nearly rigid rods. Upon collapse, this construction establishes a
+competition between two tendencies. The first is generic to any stiff--flexible
+copolymer: excluded-volume repulsion and bending energy tend to expel rigid
+segments toward the periphery while flexible segments accommodate the curvature of
+the dense core, yielding a positive correlation between local stiffness and radial
+position~\cite{KratkyPorod,Montesi}. The second is specific to the arithmetic
+origin of the sequence: the deterministic ordering of the gaps along the
+backbone constrains which segments can reach the surface. The central question is
+whether this arithmetic ordering leaves any measurable imprint on the folded state,
+or whether the conformation is fixed entirely by the \emph{marginal} distribution
+of stiffnesses, indifferent to their sequence. To resolve this we introduce a
+surrogate-based null model that preserves the marginal distribution exactly while
+destroying sequential order, and show---through a large ensemble of annealed
+trajectories---that the arithmetic ordering does leave a small but statistically
+robust signature, invisible in gross morphology and in marginal-matched nulls, yet
+detectable in the rank organization of the collapse.
+
+\section{Model definition}\label{sec:model}
+
+\subsection{Prime skeleton and gap extraction}
+We identify the beads of a chain of length $N$ with the integers
+$i = 0,1,\dots,N-1$. A sieve of Eratosthenes partitions these indices into primes
+and composites~\cite{HardyWright}. For a composite bead lying in the maximal run of
+consecutive composites bounded by the primes $p_{\text{left}} < i < p_{\text{right}}$
+we define a \emph{local prime gap} $g_i = p_{\text{right}} - p_{\text{left}}$,
+assigning every bead within a given inter-prime run the same value; for a prime bead
+$g_i = 0$. The boundary segments take $g_i = p_1$ for $i < p_1$ and
+$g_i = N - p_{\text{last}}$ for $i > p_{\text{last}}$; these end conventions affect
+only a handful of beads (fewer than one gap length at either terminus, a fraction
+$\lesssim 10^{-3}$ of the chain) and are immaterial to the rank statistics reported
+below. Within our largest system, $N = 4\times10^4$, the extremal gap is
+$g_{\max} = 72$, between the primes $31397$ and $31469$.
+
+We note a construction-level coupling that is a deliberate design choice: because
+every bead of an inter-prime run inherits the same gap value, a long gap produces a
+segment that is simultaneously \emph{longer} (its contour length is proportional to
+$g_i$) and \emph{stiffer} (its modulus grows as $e^{\alpha g_i}$, Sec.~2.2). The two
+amplifications compound, which is precisely what turns the rare long gaps into
+mechanically distinctive rigid rods. Every surrogate used in this paper inherits the
+identical coupling from its own anchor pattern, so all true-versus-surrogate
+contrasts compare like with like; the coupling shapes the \emph{absolute} morphology,
+not the controlled differences on which our conclusions rest.
+
+\subsection{Gap-driven exponential stiffness}
+The gap field is mapped onto the local bending stiffness $k_i$ through a saturated
+exponential map,
+\begin{equation}
+k_i =
+\begin{cases}
+k_{\text{hinge}}, & i \ \text{prime},\\[3pt]
+\min\!\left[\, k_{\text{hinge}}\, e^{\alpha g_i},\; k_{\max}\,\right], & i \ \text{composite}.
+\end{cases}
+\end{equation}
+The exponential rather than linear map is essential: because the gap envelope varies
+only slowly, a linear coupling produces a stiffness field too smooth to break the
+conformational symmetry, whereas the exponential map converts modest gap fluctuations
+into a stiffness contrast spanning nearly four orders of magnitude
+($k_{\max}/k_{\text{hinge}} = 2000$ at our parameters). The amplification coefficient
+$\alpha$ and cap $k_{\max}$ are fixed by an independent stability calibration
+(Sec.~\ref{sec:calib}).
+
+\subsection{Coarse-grained potential energy}
+Bonds between consecutive beads are harmonic,
+\begin{equation}
+E_{\text{bond}} = \tfrac{1}{2} k_{\text{bond}} \sum_{i=1}^{N-1}
+\big(\lvert \mathbf{r}_i - \mathbf{r}_{i-1}\rvert - b_0\big)^2 ,
+\end{equation}
+with rest length $b_0$. The gap-driven stiffness enters through a cosine bending
+potential on interior triplets,
+\begin{equation}
+E_{\text{bend}} = \sum_{i=1}^{N-2} k_i \left(1 - \cos\theta_i\right),\qquad
+\cos\theta_i = \frac{(\mathbf{r}_i-\mathbf{r}_{i-1})\cdot(\mathbf{r}_{i+1}-\mathbf{r}_i)}
+{\lvert\mathbf{r}_i-\mathbf{r}_{i-1}\rvert\,\lvert\mathbf{r}_{i+1}-\mathbf{r}_i\rvert},
+\end{equation}
+so that $k_i$ acts as a local, sequence-dependent bending modulus~\cite{KratkyPorod,Montesi}.
+Self-avoidance is a purely repulsive Weeks--Chandler--Andersen (WCA) interaction
+between non-bonded pairs ($\lvert i-j\rvert > 1$)~\cite{WCA},
+\begin{equation}
+E_{\text{WCA}}(r) =
+\begin{cases}
+4\varepsilon\!\left[(\sigma/r)^{12}-(\sigma/r)^{6}\right] + \varepsilon, & r < r_c = 2^{1/6}\sigma,\\[3pt]
+0, & r \ge r_c,
+\end{cases}
+\end{equation}
+evaluated with a $k$-d-tree neighbor list and with the pairwise force magnitude
+capped at $f_{\text{cap}}^{\text{WCA}}$ as a numerical safeguard. Finally, a weak
+radial restoring force tethers each bead to the instantaneous center of mass
+$\mathbf{r}_{\mathrm{cm}}$,
+\begin{equation}
+\mathbf{F}^{\text{conf}}_i = -\,k_{\text{conf}}\,(\mathbf{r}_i - \mathbf{r}_{\mathrm{cm}}),
+\end{equation}
+with $k_{\text{conf}}$ small: it gathers the globule without crushing the rigid rods,
+allowing the gap-driven gradient to survive collapse.
+
+\subsection{Overdamped Langevin dynamics and annealing}
+The chain is propagated with overdamped (Brownian) Langevin dynamics in reduced
+units ($\sigma = \varepsilon = k_B = 1$)~\cite{Ermak}:
+\begin{equation}
+\mathbf{r}_i \leftarrow \mathbf{r}_i + \mu\,\mathbf{F}_i\,\Delta t
++ \sqrt{2\mu\, k_B T\, \Delta t}\;\boldsymbol{\xi}_i,\qquad
+\boldsymbol{\xi}_i \sim \mathcal{N}(\mathbf{0}, \mathbb{I}_3),
+\end{equation}
+where $\mathbf{F}_i = -\nabla_i E$, $\mu$ is the mobility, and $\boldsymbol{\xi}_i$
+is independent Gaussian noise. Compaction is achieved by simulated
+annealing~\cite{Kirkpatrick}, lowering the temperature geometrically,
+\begin{equation}
+k_B T(t) = k_B T_{\text{hi}} \left(T_{\text{lo}}/T_{\text{hi}}\right)^{t/(n_{\text{steps}}-1)} .
+\end{equation}
+Per-bead displacements are capped at $\lvert\Delta\mathbf{r}_i\rvert \le \delta_{\max}$,
+and each trajectory is initialized as a correlated random walk (persistence $0.55$).
+Parameters are listed in Table~\ref{tab:params}.
+
+\begin{table}[htbp]
+\centering
+\caption{Model and protocol parameters (reduced units).}
+\label{tab:params}
+\begin{tabular}{lll}
+\toprule
+Symbol & Value & Meaning \\
+\midrule
+$b_0$ & $1.0$ & bond rest length \\
+$k_{\text{bond}}$ & $45.0$ & bond stiffness \\
+$k_{\text{hinge}}$ & $0.25$ & baseline (prime) bending stiffness \\
+$\alpha$ & $0.15$ & gap amplification coefficient (calibrated) \\
+$k_{\max}$ & $500.0$ & bending-stiffness cap (calibrated) \\
+$\sigma,\ \varepsilon$ & $1.0,\ 1.0$ & WCA diameter, energy scale \\
+$r_c$ & $2^{1/6}\sigma$ & WCA cutoff \\
+$f_{\text{cap}}^{\text{WCA}}$ & $30.0$ & WCA force cap \\
+$k_{\text{conf}}$ & $0.02$ & weak confinement constant \\
+$\mu$ & $1.0$ & mobility \\
+$\Delta t$ & $0.008$ & integration step \\
+$\delta_{\max}$ & $0.25$ & per-bead displacement cap \\
+$k_B T_{\text{hi}},\ k_B T_{\text{lo}}$ & $0.50,\ 0.003$ & annealing temperature range \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.72\linewidth]{fig1_conformation.pdf}
+\caption{Representative folded conformation of the PDTP chain at $N = 4\times10^{4}$
+(overdamped Langevin with simulated annealing, $3800$ steps, seed $42$). Beads are
+colored by $\log_{10}$ of the local bending stiffness $k_i$ [Eq.~(1)], from flexible
+prime-rich hinges (blue, $k_i = k_{\text{hinge}} = 0.25$) to rigid long-gap rods
+(red, capped at $k_{\max} = 500$). The chain collapses to a compact globule
+($R_g = 110.7$) in which dense flexible cores are threaded by rigid rods extending
+into peripheral loops; for this conformation the stiffness--radius rank correlation
+is $\rho = +0.065$ and the tail-weighted core--shell separation $\Delta R = +21.0$.}
+\label{fig:conformation}
+\end{figure}
+
+\section{Pre-flight calibration}
+\label{sec:calib}
+
+Because the stiffness field of Eq.~(1) is amplified exponentially, the rare
+long-gap sites carry bending moduli orders of magnitude above the baseline, and an
+explicit integrator can in principle diverge within a single step. We bound the
+parameters \emph{a priori} through a worst-case stress test on an isolated
+segment~\cite{Allen}. We locate the global maximum gap ($g_{\max} = 72$, between the
+primes $31397$ and $31469$) and extract the $150$-bead window centred on it
+(indices $[31358, 31508)$). The segment is evolved under bond and gap-driven bending
+forces alone, with the production displacement cap \emph{removed} so that any latent
+divergence is exposed, while a small thermal noise ($k_B T = 0.05$) continually
+injects curvature.
+
+Two findings emerge. First, the cosine bending potential of Eq.~(3) is
+\emph{self-limiting}: its restoring force scales as $\sin\theta_i$ and vanishes as a
+segment straightens, so a rigid rod relaxes toward the straight configuration
+without overshoot. Sweeping $\alpha \in [0.05, 0.15]$---and, independently, relaxing
+the cap to the fully uncapped limit, where the stiffness at $g_{\max}$ reaches
+$k \approx 1.2 \times 10^{4}$ (nearly $5 \times 10^{4}\,k_{\text{hinge}}$)---produces
+no divergence over the test window. The exponential amplification is thus \emph{not}
+the binding stability constraint. Second, the binding constraint is set by the
+stiffest \emph{harmonic} term, the bonds: sweeping the timestep, the scheme is stable
+for $\Delta t \le 0.01$ but diverges within a few steps for $\Delta t \gtrsim 0.02$,
+consistent with the fastest bond-mode limit $\Delta t \lesssim 2/(4\mu k_{\text{bond}})
+\approx 0.011$. Guided by this, the production runs adopt $\alpha = 0.15$ with a
+conservative cap $k_{\max} = 500$ (a factor $\approx 25$ below the uncapped worst case)
+and a hard displacement bound $\delta_{\max} = 0.25$; with $\Delta t = 0.008$ lying a
+factor $\approx 2.5$ below the divergence threshold, all trajectories operate well
+inside the stable regime. The calibration's purpose is not to maximize the stiffness
+contrast but to certify that the symmetry-breaking map can be integrated without
+numerical artifacts that could masquerade as structural signal.
+
+\section{Results}
+
+We compare the true prime chain against surrogates under identical force fields,
+dynamics, and annealing; the only difference between arms is the anchor pattern
+generating the stiffness field. Three observables characterize the collapsed state:
+the radius of gyration $R_g$; the percentile core--shell separation $\Delta R$, the
+mean radial distance of the stiffest $20\%$ of beads minus that of the most flexible
+$20\%$; and the Spearman rank correlation $\rho$ between local stiffness $k_i$ and
+radial distance. Positive $\rho$ or $\Delta R$ indicates rigid segments at the
+periphery. Ensembles comprise $n$ independent trajectories per arm. Throughout the
+paper, values quoted as $x \pm y$ denote the ensemble mean $\pm$ the standard error
+of the mean (s.e.m.), and box plots show medians and quartiles; $p$-values are
+two-sided Welch $t$-tests unless a Mann--Whitney $U$ test is stated, and $d$ is
+Cohen's $d$.
+
+\subsection{Global collapse is surrogate-invariant}\label{sec:global}
+All arms collapse along indistinguishable trajectories and their gross dimensions do
+not separate. At $N = 10^4$ the radius of gyration is $R_g = 57 \pm 16$ (true) versus
+$49 \pm 13$ (shuffle) (Welch $p = 0.20$, $n = 10$); we note that this comparison
+derives from the initial low-statistics sweep and, at $n = 10$ per arm, resolves only
+large differences---it bounds, rather than excludes, any $R_g$ effect. The gross
+core--shell amplitude, measured at full statistics, is likewise unresolved:
+$\Delta R = 14.4 \pm 0.7$ versus $15.1 \pm 0.5$ at $N = 4\times10^4$ ($p = 0.37$,
+$n = 40$). Within our sensitivity, the overall size and the gross magnitude of
+stiffness segregation are therefore fixed by the marginal stiffness distribution,
+which every surrogate preserves.
+
+\subsection{A core--shell ordering signature}
+The rank correlation $\rho$ reveals a signature of ordering. In our decisive
+experiment---$N = 4\times10^4$, deep annealing ($8000$ steps, i.e.\ $0.20$
+steps/bead, matched to the per-bead depth of the $N=10^{4}$ reference protocol),
+$n = 40$ per arm---both arms exhibit positive $\rho$, but the sorting is significantly
+\emph{weaker} for the true chain: $\rho = +0.105 \pm 0.007$ versus
+$+0.137 \pm 0.004$ (Welch $p = 6.5\times10^{-5}$, Mann--Whitney $p = 3.1\times10^{-4}$,
+$d = -0.96$; Fig.~\ref{fig:decisive}). The deterministic ordering thus imposes a
+reproducible \emph{resistance} to the radial sorting generic stiff--flexible physics
+would otherwise produce. The effect is quantitatively modest---stiffness accounts for
+only $\rho^2 \approx 1\%$ of the radial-rank variance---but statistically robust. The
+same comparison in $\Delta R$ is not resolved at this size ($p = 0.37$): the ordering
+signal resides in the global rank structure, not in the stiffness extremes, which is
+why the low-variance estimator $\rho$ is required.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{fig2_decisive.pdf}
+\caption{Decisive test at $N = 4\times10^{4}$, deep annealing ($8000$ steps,
+$0.20$ steps/bead), $n = 40$ per arm; values are mean $\pm$ s.e.m.
+(a)~Spearman $\rho$: true primes $+0.105 \pm 0.007$ vs.\ shuffle
+S1 $+0.137 \pm 0.004$ (Welch $p = 6.5\times10^{-5}$, Mann--Whitney
+$p = 3.1\times10^{-4}$, $d = -0.96$)---the true sequence is significantly less
+radially sorted. (b)~$\Delta R = 14.4 \pm 0.7$ vs.\ $15.1 \pm 0.5$ ($p = 0.37$,
+$d = -0.20$), statistically indistinguishable. Boxes: median and quartiles; points:
+individual runs.}
+\label{fig:decisive}
+\end{figure}
+
+\subsection{Ordering versus marginal distribution}\label{sec:decomp}
+To attribute the effect we compare three arms at $N = 10^4$, $n = 40$: the true
+chain; the Shuffle (S1), preserving the exact gap multiset but randomizing order; and
+a Cram\'er surrogate (S3), placing pseudo-primes at density $1/\ln i$, preserving only
+the coarse density trend~\cite{Cramer}. The decomposition is clean
+(Fig.~\ref{fig:decomp}). The ordering contrast (true vs.\ S1) is strongly significant
+($\Delta\rho = -0.051$, $p = 1.6\times10^{-5}$, $d = -1.05$). The marginal-shape
+contrast (S1 vs.\ S3), both order-randomized, is small and not significant
+($\Delta\rho = -0.017$, $p = 0.09$, $d = -0.38$). The combined contrast (true vs.\ S3)
+is largest ($\Delta\rho = -0.068$, $p = 1.2\times10^{-6}$, $d = -1.18$). Arithmetic
+ordering therefore accounts for the bulk of the effect ($\approx 75\%$ of the combined
+shift), while the shape of the gap distribution contributes little. This is the
+central result: what the folded conformation registers is not the composition of the
+prime-gap sequence but its sequential, long-range arithmetic structure.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.6\linewidth]{fig3_decomposition.pdf}
+\caption{Ordering versus marginal-distribution decomposition at $N = 10^{4}$,
+$n = 40$ per arm, reference annealing protocol ($2000$ steps, $0.20$ steps/bead);
+values are mean $\pm$ s.e.m. True primes ($\rho = -0.023 \pm 0.010$), shuffle S1
+($+0.028 \pm 0.005$; exact gap multiset, order randomized), and Cram\'er surrogate S3
+($+0.045 \pm 0.009$; pseudo-primes at density $1/\ln i$). Ordering (true vs.\ S1):
+$p = 1.6\times10^{-5}$, $d = -1.05$. Marginal shape (S1 vs.\ S3): $p = 0.09$
+(n.s.). Combined (true vs.\ S3): $p = 1.2\times10^{-6}$, $d = -1.18$.}
+\label{fig:decomp}
+\end{figure}
+
+\subsection{Finite-size behaviour}
+Finally, we examine the size dependence across $N = 10^4, 2\times10^4, 4\times10^4$
+(Fig.~\ref{fig:fss}). In both $\rho$ and $\Delta R$, the true chain lies
+systematically below the shuffle at every size, with significance at $N = 10^4$ and
+$2\times10^4$ ($\rho$: $p = 3\times10^{-3}$ and $2\times10^{-3}$). An initial sweep at
+$N = 4\times10^4$ with reduced statistics ($n = 20$) and shallower annealing returned
+a gap below threshold ($p = 0.075$); the decisive experiment of Sec.~4.2 shows this to
+be a power-and-protocol artifact rather than a genuine fade---at matched per-bead
+annealing depth and $n = 40$, the same gap is recovered at $p = 6.5\times10^{-5}$. We
+caution that the \emph{absolute} correlation grows with $N$ for both arms (from
+$\rho \approx 0$ at $N = 10^4$ to $\rho \approx +0.1$ at $N = 4\times10^4$), reflecting
+both progressive collapse and the varying annealing depth of the sweep; consequently
+only the fixed-$N$ gap between true and shuffle constitutes a controlled comparison,
+and we read the absolute $N$-dependence as a trend rather than an equilibrium scaling
+law. Within the range studied, once statistics and annealing depth are controlled, the
+ordering signature is present and significant at every size.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{fig4_finite_size.pdf}
+\caption{Finite-size behaviour, true vs.\ shuffle S1, for
+$N = 10^{4}, 2\times10^{4}, 4\times10^{4}$ ($n = 20$ per arm; annealing
+$2000/3500/5000$ steps, i.e.\ a per-bead depth of $0.20/0.175/0.125$ steps/bead
+that \emph{decreases} with $N$---this sweep is therefore not depth-matched across
+sizes, and its $N=10^{4}$ ensemble ($n=20$) is distinct from the $n=40$ ensemble of
+Fig.~\ref{fig:decomp}, which is why the absolute values differ slightly between the
+two figures). (a)~Spearman $\rho$ and (b)~$\Delta R$ vs.\ $N$
+(mean $\pm$ s.e.m.). The true chain lies below the shuffle at every size. The gap is
+significant at $N = 10^{4}$ and $2\times10^{4}$; the reduced-statistics point at
+$N = 4\times10^{4}$ ($p = 0.075$) is resolved by the deeper-annealed, higher-$n$
+experiment of Fig.~\ref{fig:decisive} ($p = 6.5\times10^{-5}$). Only the fixed-$N$
+true--shuffle gap is a controlled comparison.}
+\label{fig:fss}
+\end{figure}
+
+\section{Discussion}
+
+\subsection{What the fold registers}
+The representative conformation (Fig.~\ref{fig:conformation}; $R_g \approx 111$)
+displays the generic architecture of a semiflexible heteropolymer: dense flexible
+cores threaded and flanked by rigid rods that extend into loops toward the periphery.
+Both the true chain and its surrogates share this gross morphology; their difference
+lies elsewhere. Neither $R_g$ nor $\Delta R$ distinguishes the true sequence from a
+stiffness-matched shuffle; only the rank correlation $\rho$ does, and there the true
+sequence is significantly \emph{less} sorted. The folded conformation thus behaves as
+a physical readout sensitive not to the composition of the stiffness sequence but to
+its sequential arrangement---specifically to correlations that a random permutation
+destroys.
+
+\subsection{Falsification of the local-trap hypothesis and the emergence of
+macroscopic order}
+\label{sec:scissors}
+
+In version~1.0 of this work we advanced a concrete, falsifiable hypothesis for the
+ordering signature of Sec.~\ref{sec:decomp}. Observing that dense clusters of small
+gaps---twin primes (gap $2$) alone account for ${\approx}14\%$ of all
+gaps~\cite{HardyLittlewood}---we conjectured that these clusters act as \emph{local
+topological traps}, anchoring neighbouring rigid rods within the collapsed interior
+and thereby \emph{reducing} the stiffness--radius rank correlation $\rho$ below that
+of an order-randomized shuffle. This hypothesis carries a sharp, testable prediction:
+the correlation length responsible for the signal must be \emph{short}, so that
+preserving gap order over modest contiguous windows already suffices to reproduce the
+true-chain suppression. We have now tested that prediction directly---with the
+scale-selective surrogates anticipated in version~1---and find it false.
+
+We introduce a complementary pair of surrogates---a ``scissors'' test---each of which
+preserves the gap multiset \emph{exactly} (and hence the marginal stiffness
+distribution of the shuffle S1), differing only in the scale at which sequential
+order is destroyed. Partition the ordered prime-gap sequence into contiguous blocks
+of length $L$ (measured in gaps). The \emph{block shuffle} (S4) retains the gap order
+\emph{within} each block but randomizes the arrangement \emph{of} the blocks,
+destroying long-range order while preserving local order; it interpolates from S1 at
+$L=1$ to the true chain at $L \ge n_{\mathrm{gap}}$. The \emph{local scramble} (S5)
+performs the converse operation---it holds the blocks in their true global positions
+but randomizes the gaps \emph{within} each block, destroying local order while
+preserving the large-scale arrangement---and interpolates from the true chain at
+$L=1$ to S1 at $L \ge n_{\mathrm{gap}}$. Both are evaluated on the common axis
+$f(L) \equiv (\rho_{\mathrm{S1}}-\rho)/(\rho_{\mathrm{S1}}-\rho_{\mathrm{true}})$,
+with $f=0$ shuffle-like and $f=1$ true-like. All arms use $N=10^{4}$, $n=40$, and the
+reference annealing protocol of Sec.~\ref{sec:model} (Table~\ref{tab:params};
+$2000$ steps, $0.20$ steps/bead), so that each surrogate is directly comparable to
+the true and S1 ensembles of Sec.~\ref{sec:decomp}.
+
+The two blades give opposite and decisive answers (Fig.~\ref{fig:scissors}).
+Destroying \emph{long-range} order abolishes the signal at every scale probed: S4 is
+statistically indistinguishable from the shuffle for all $L \in \{10,50,100,500\}$
+(S4 vs.\ S1: $p \ge 0.10$, $|d| \le 0.38$), never descending toward the true chain.
+Destroying \emph{local} order, by contrast, leaves the signal fully intact: at $L=50$
+and $L=100$ the local scramble reproduces the true chain to within noise (S5 vs.\
+true: $\rho = -0.025 \pm 0.010$, $p = 0.91$, $d = -0.03$; and
+$\rho = -0.029 \pm 0.008$, $p = 0.62$, $d = -0.11$), while differing from the shuffle
+at the \emph{full} strength of the original ordering effect ($d = -1.07$ and
+$d = -1.37$; $p = 1.3\times10^{-5}$ and $5.8\times10^{-8}$)---an effect size matching
+the $d = -1.05$ of the primary true-vs-shuffle contrast (Sec.~\ref{sec:decomp}). The
+imprint thus survives complete randomization of gap order within windows of one
+hundred consecutive gaps---windows that shred every twin- and cousin-prime cluster in
+place---yet vanishes the instant the large-scale arrangement of those windows is
+disturbed.
+
+This constitutes a clean falsification. Local order is neither \emph{sufficient}
+(S4 retains it and the signal dies) nor \emph{necessary} (S5 destroys it and the
+signal persists) to reproduce the true-chain suppression. The local topological-trap
+mechanism conjectured in version~1 is therefore excluded as the driver at $N=10^{4}$.
+The result simultaneously sharpens the decomposition of Sec.~\ref{sec:decomp}: the
+Cram\'er surrogate S3, which retains only the coarse $1/\ln i$ density
+trend~\cite{Cramer}, does \emph{not} reproduce the true chain
+($\rho_{\mathrm{S3}} = +0.045$, statistically near S1), whereas S5, which retains the
+true \emph{correlated} arrangement on scales $\gtrsim L$, does. What the fold
+registers is thus neither the marginal composition of the gap sequence nor its fine
+local texture, but its genuine long-range arithmetic order.
+
+Because the local-scramble blade is free of the combinatorial starvation that
+inflates the variance of S4 at large $L$ (at $L=500$ only three blocks remain, and
+the block-permutation ensemble collapses to $3! = 6$ arrangements), it further
+permits a direct estimate of the correlation length. The retention
+$f_{\mathrm{S5}}(L)$ falls from unity through half-maximal at $L = \xi$, giving
+\begin{equation}
+  \xi \;\approx\; 3.5 \times 10^{2}\ \text{gaps}
+  \qquad (\text{$68\%$ CI } [1.8,\,4.9]\times10^{2}),
+  \label{eq:xi}
+\end{equation}
+a scale spanning ${\approx}30\%$ of the $n_{\mathrm{gap}} = 1228$-gap sequence at
+$N=10^{4}$. We emphasize that $\xi$, like every observable in this paper, is a
+property of the \emph{annealed} ensemble and is therefore conditioned on the
+annealing protocol: Eq.~\eqref{eq:xi} is the half-retention scale under the
+reference protocol ($2000$ steps, $0.20$ steps/bead), not a protocol-independent
+equilibrium constant. The order responsible for the topological imprint is, in this
+precise sense, \emph{macroscopic}: it resides not in the neighbourhood of any
+individual prime but across a finite fraction of the entire progression sampled. We
+note that $\xi$ exceeds the few-lag range over which prime-gap pair-clustering is
+concentrated~\cite{AresCastro}, indicating that the fold responds to correlations
+beyond nearest-neighbour clustering.
+
+\paragraph*{Note added (Version 3.0).}
+Follow-up work by the author (R.~Chen, companion manuscript, in preparation), which
+measures $\xi(N)$ across
+$N = 10^{4}$--$8\times10^{4}$ at an annealing depth matched across sizes and deeper
+than the reference protocol used here, re-measures the $N=10^{4}$ crossover under
+that deeper protocol and obtains $\xi \approx 4.8\times10^{2}$ gaps ($68\%$
+bootstrap CI $[4.1, 5.7]\times10^{2}$; $\xi/n_{\mathrm{gap}} \approx 0.39$). The
+deeper-annealed value lies at the upper edge of the interval in Eq.~\eqref{eq:xi}:
+deeper annealing lets the chain express the arithmetic ordering out to somewhat
+larger block scales. The two measurements are protocol-conditioned estimates of the
+same crossover and are compatible in this sense; both place $\xi$ at a macroscopic
+fraction (${\sim}0.3$--$0.4$) of the sequence, so the falsification of the
+local-trap hypothesis and the macroscopic-order conclusion of this section are
+unaffected. The protocol sensitivity of the \emph{absolute} value of $\xi$ should
+nonetheless be borne in mind wherever the number in Eq.~\eqref{eq:xi} is quoted.
+
+Two caveats bound this conclusion. First, $\xi$ is estimated from a four-point
+retention curve at a single size; the wide interval in Eq.~\eqref{eq:xi} reflects
+this, and a finer S5 sweep over $L \in [150, 800]$ would tighten it. Second, and more
+consequential, whether $\xi$ grows in proportion to $N$---the hallmark of scale-free
+long-range order---or saturates at a fixed number of gaps---a genuine finite
+correlation length---cannot be decided from a single $N$; resolving this dichotomy is
+the central question the present result raises. We also record a mild,
+sub-significant over-suppression by S5 at the smallest window ($L=10$:
+$\rho = -0.046 \pm 0.009$, $d = -0.39$ vs.\ true, $p = 0.089$), consistent either with
+statistical fluctuation or with a weak counteracting role of the finest local order.
+Within these bounds the physical picture that replaces the local trap is unambiguous
+in direction: the true prime sequence stamps a residue of \emph{macroscopic}
+arithmetic order onto the folded conformation, and it is this long-range
+structure---not local clustering---that the polymer reads. In the language of
+version~1's closing sentence, which held that ``ordering matters, not yet how,'' we
+can now state that the \emph{how} is macroscopic.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.82\linewidth]{fig5_scissors.pdf}
+\caption{The S4/S5 scissors at $N=10^{4}$, $n=40$ per arm, reference annealing
+protocol ($2000$ steps, $0.20$ steps/bead). Spearman $\rho$
+(stiffness vs.\ radius) against block length $L$, with the true-prime and shuffle
+(S1) reference bands (mean $\pm$ s.e.m.). \textbf{S4} (block shuffle; destroy global
+order, keep local) remains statistically pinned to the shuffle band at every $L$
+(vs.\ S1: $p \ge 0.10$). \textbf{S5} (local scramble; destroy local order, keep
+global) remains pinned to the true-prime band up to $L \approx 10^{2}$ (vs.\ true at
+$L=50,100$: $p = 0.91, 0.62$) and departs toward the shuffle only for
+$L \gtrsim \xi$. The two blades cross near the half-retention scale
+$\xi \approx 3.5\times10^{2}$ gaps (shaded, $68\%$ CI $[1.8,4.9]\times10^{2}$), the
+correlation length over which the core--shell ordering collapses.}
+\label{fig:scissors}
+\end{figure}
+
+\subsection{Connections and relation to prior work}
+Our result offers a physical manifestation of the fact that the prime-gap sequence is
+neither periodic nor memoryless~\cite{HardyWright,HardyLittlewood,AresCastro}: a
+folding process, despite the drastic coarse-graining it imposes, still transmits a
+residue of arithmetic order into three-dimensional structure. In this sense the
+polymer acts as an unconventional probe of long-range correlations in the primes,
+complementary to spectral and combinatorial approaches~\cite{Montgomery,BerryKeating}
+and to statistical analyses reporting $1/f$-type long-range correlations in the
+distribution of the primes themselves~\cite{Wolf}, with which the macroscopic
+correlation scale found here is qualitatively consonant. The general idea of using
+polymeric compaction as a readout of long-range correlations in a one-dimensional
+data sequence was proposed by Odijk~\cite{Odijk}, who suggested extracting
+informational correlations from the shape anisotropy of a globule collapsed under a
+sequence-derived energy; our construction differs in mapping the sequence onto a
+mechanical (bending) field rather than an interaction energy, in reading out rank
+statistics of the radial organization rather than shape harmonics, and---most
+importantly---in the marginal-matched, scale-selective surrogate hierarchy that
+permits a controlled attribution of the signal to ordering at a measured scale.
+
+Two bodies of prior work frame the polymer-physics side of the result. First, the
+conformation-dependent sequence-design programme of Khokhlov and
+Khalatur~\cite{KhokhlovKhalatur} established the \emph{converse} map to ours:
+coloring a collapsed homopolymer globule by radial position generates
+``protein-like'' HP sequences, and these globule-derived sequences were shown to
+carry L\'evy-flight-type long-range correlations~\cite{Govorun}. That programme
+runs from structure to sequence and finds that long-range-correlated sequences are
+precisely those \emph{adapted} to core--shell organization; we run from sequence to
+structure and find that the primes' particular long-range order \emph{resists} the
+radial stiffness sorting that marginal-matched random orderings undergo. The two
+results are complementary rather than contradictory---the designed correlations of
+Ref.~\cite{Govorun} are constructed to be commensurate with a radially sorted
+globule, whereas the arithmetic correlations of the primes are quenched constraints
+with no such adaptation---and together they indicate that the \emph{sign} of a
+long-range-correlation effect on radial organization depends on the structure of
+the correlations, not merely on their presence. Second, mean-field analyses of
+random heteropolymers with power-law-correlated sequences~\cite{Mamasakhlisov} and
+studies of correlated-sequence copolymer ensembles found that sequence correlations
+reshape freezing and adsorption behaviour; our contribution relative to that line
+is the single-sequence, surrogate-controlled setting, in which the correlations are
+deterministic and the attribution is made against an exactly marginal-matched null
+rather than across random ensembles. Prior work mapping a deterministic aperiodic
+sequence onto a molecular chain---Fibonacci-arranged DNA segments~\cite{Azevedo}---
+examined conformational scaling of the aperiodic chain itself; the ordering-versus-
+composition question addressed here, which requires the surrogate machinery, was
+not posed there.
+
+Finally, the macroscopic correlation length identified in Sec.~\ref{sec:scissors}
+invites a number-theoretic interpretation in light of the effective
+limit-periodicity and hyperuniformity of the primes~\cite{Torquato2018,Torquato2019}:
+it is natural to conjecture that the fold registers a residue of precisely this
+multiscale order. Because hyperuniformity is a statement about the \emph{two-point}
+structure (the small-$k$ structure factor), the spectrally matched surrogate
+proposed in Sec.~\ref{sec:limitations} would test this conjecture directly: if an
+amplitude-adjusted, spectrum-preserving randomization reproduces the true-chain
+suppression, the fold reads the two-point (limit-periodic/hyperuniform) layer of
+the primes' order; if it does not, higher-order arithmetic structure is implicated.
+On the physical side, the construction sits within the study of aperiodic and
+deterministic order---quasicrystals, aperiodic tilings, and sequence-programmed
+matter~\cite{Shechtman,Levine,Macia}. We are, however, cautious about extrapolation:
+the effect is small in absolute terms, and we make no claim of a route to functional
+metamaterials. What we demonstrate is narrower and cleaner: that a deterministic,
+aperiodic arithmetic sequence leaves a detectable, reproducible imprint on the
+equilibrium-like conformation of a physical model, distinguishable from every
+marginal-matched null.
+
+\subsection{Limitations}\label{sec:limitations}
+Several limitations bound these conclusions. First, the effect is quantitatively
+small: local stiffness accounts for only $\sim\!1\%$ of the radial-rank variance, the
+distributions overlap heavily, and no single conformation can be classified as
+``prime'' or ``shuffled''---the signal is a shift in the ensemble mean. Second, our
+ensembles are generated by simulated annealing rather than sampled from a true
+equilibrium distribution; absolute observables depend on the protocol, and only the
+fixed-$N$ true--surrogate contrast, annealed identically, is controlled. Third, we
+have examined a single stiffness map---one $\alpha$, one functional form, one
+confinement; robustness across this parameter space remains to be charted. Fourth, our
+sizes reach only $N = 4\times10^4$; the absolute correlation drifts upward with $N$,
+and while the gap is significant at every size once statistics and annealing depth are
+controlled, its fate in the thermodynamic limit is genuinely open. Fifth, as made
+explicit in Sec.~\ref{sec:scissors}, the correlation length $\xi$ is conditioned on
+the annealing protocol: its absolute value shifts with annealing depth (see the note
+added in Sec.~\ref{sec:scissors}), and only its order of
+magnitude---macroscopic, a substantial fraction of the sequence---is
+protocol-robust within the depths explored. Sixth, two inexpensive robustness
+controls remain to be run and are natural next steps: (i)~a \emph{partial} rank
+correlation between stiffness and radius controlling for backbone index $i$ (the
+$1/\ln i$ density decay makes the mean stiffness drift monotonically along the
+chain, so chain-end effects could in principle contribute to $\rho$), together with
+a sequence-reversal control; and (ii)~a spectrally matched surrogate (e.g.\
+amplitude-adjusted Fourier transform), which preserves the two-point
+autocorrelation of the gap sequence while destroying higher-order structure and
+would determine whether the fold reads only second-order statistics. Finally, the
+signal is carried by the sensitive rank estimator $\rho$ and is not resolved by the
+tail-based $\Delta R$ at the largest size. We emphasize that this is a controlled
+in-silico construction: we make no claim that prime numbers are physically
+privileged in nature, and none of biological relevance.
+
+\section{Conclusion}
+We introduced the PDTP model and used it to ask whether the folded state of an
+aperiodic-but-deterministic sequence is determined by its composition alone or also by
+its arithmetic ordering. By comparing the true prime chain against surrogates that
+preserve the marginal stiffness distribution exactly while destroying order, we found
+the answer to be affirmative but bounded. The gross conformation is
+surrogate-invariant---neither $R_g$ nor $\Delta R$ distinguishes true from shuffle---so
+overall size and coarse morphology are fixed by the marginal distribution. The finer
+organization is not: the stiffness--radius rank correlation is significantly suppressed
+for the true sequence ($\rho = +0.105$ vs.\ $+0.137$ at $N = 4\times10^4$;
+$p = 6.5\times10^{-5}$, $d = -0.96$), an effect a three-way decomposition attributes to
+arithmetic ordering rather than to the gap distribution, and reproducible across sizes
+once statistics and annealing depth are controlled. The effect is quantitatively
+modest ($\sim\!1\%$ of the radial-rank variance) and is a property of the ensemble
+rather than of any single fold. Version~2.0 resolves the mechanism left open in version~1. Two scale-selective
+surrogates act as a \emph{scissors} on the correlation length: a block shuffle (S4),
+which destroys long-range order while preserving local order, and its converse, a
+local scramble (S5), which preserves the global arrangement while destroying local
+order (Sec.~\ref{sec:scissors}, Fig.~\ref{fig:scissors}). The two blades give opposite
+and decisive verdicts. Destroying \emph{local} order leaves the ordering signature
+fully intact---S5 is statistically indistinguishable from the true chain for windows
+up to ${\sim}10^{2}$ gaps ($p = 0.62$--$0.91$)---whereas destroying \emph{global}
+order abolishes it, S4 remaining indistinguishable from the shuffle at every scale
+($p \ge 0.10$). Local order is therefore neither sufficient nor necessary to
+reproduce the signal, and the local-cluster ``topological-trap'' hypothesis is ruled
+out: the imprint is driven not by twin-prime clustering but by an irreducible,
+\emph{macroscopic} long-range arithmetic correlation of length
+$\xi \approx 3.5\times10^{2}$ gaps under the reference protocol---a scale spanning
+${\approx}30\%$ of the sequence, and shifting to ${\approx}0.39$ of the sequence
+under deeper annealing (note added, Sec.~\ref{sec:scissors})---so that the
+macroscopic character of the scale, rather than its precise value, is the
+protocol-robust statement. The correlation scale responsible for the signal,
+identified as the most immediate open question in version~1, is thus now measured
+up to this protocol conditioning. Beyond the specific case of primes,
+the PDTP framework and its surrogate-null methodology offer a controlled testbed for
+how one-dimensional deterministic order is---and is not---expressed in
+three-dimensional structure. The remaining frontier is the scaling of $\xi$ with
+system size---whether it grows in proportion to $N$, the signature of scale-free
+long-range order, or saturates at a fixed gap count, a genuine finite correlation
+length---together with the robustness of the effect across the stiffness-map
+parameter space.
+
+\section*{Data and code availability}
+All code, data, and figure-generation scripts that reproduce the results of this paper
+are openly available at
+\url{https://github.com/Ruqing1963/prime-driven-topological-polymer}. The repository
+contains the pre-flight calibration, the surrogate/null-model decomposition, the
+finite-size sweep, the decisive $N = 4\times10^4$ experiment, and the conformation
+generator, together with the ensemble result files and a script that regenerates all
+figures. Version~2.0 additionally provides the two scale-selective surrogate
+drivers---the block shuffle (\texttt{block\_shuffle\_test.py}, S4) and the local
+scramble (\texttt{block\_local\_scramble\_test.py}, S5)---with their $N = 10^4$
+ensembles and the scissors figure. For long-term preservation, this release
+(version~3.0) is archived on Zenodo under DOI
+\href{https://doi.org/10.5281/zenodo.22020688}{10.5281/zenodo.22020688};
+the version~3.0 changes relative to version~2.0 are enumerated in the Version~3.0
+note above and in the repository \texttt{CHANGELOG}.
+
+\begin{thebibliography}{99}
+\bibitem{deGennes} P.-G. de Gennes, \emph{Scaling Concepts in Polymer Physics}
+(Cornell University Press, Ithaca, 1979).
+\bibitem{LiebermanAiden} E. Lieberman-Aiden \emph{et al.}, Science \textbf{326}, 289 (2009). \href{https://doi.org/10.1126/science.1181369}{doi:10.1126/science.1181369}.
+\bibitem{Pande} V. S. Pande, A. Yu. Grosberg, and T. Tanaka, Rev. Mod. Phys. \textbf{72}, 259 (2000). \href{https://doi.org/10.1103/RevModPhys.72.259}{doi:10.1103/RevModPhys.72.259}.
+\bibitem{Leibler} L. Leibler, Macromolecules \textbf{13}, 1602 (1980). \href{https://doi.org/10.1021/ma60078a047}{doi:10.1021/ma60078a047}.
+\bibitem{Bates} F. S. Bates and G. H. Fredrickson, Annu. Rev. Phys. Chem. \textbf{41}, 525 (1990). \href{https://doi.org/10.1146/annurev.pc.41.100190.002521}{doi:10.1146/annurev.pc.41.100190.002521}.
+\bibitem{Bryngelson} J. D. Bryngelson and P. G. Wolynes, Proc. Natl. Acad. Sci. USA \textbf{84}, 7524 (1987). \href{https://doi.org/10.1073/pnas.84.21.7524}{doi:10.1073/pnas.84.21.7524}.
+\bibitem{Garel} T. Garel and H. Orland, Europhys. Lett. \textbf{6}, 307 (1988). \href{https://doi.org/10.1209/0295-5075/6/4/005}{doi:10.1209/0295-5075/6/4/005}.
+\bibitem{Montgomery} H. L. Montgomery, in \emph{Analytic Number Theory}, Proc. Sympos. Pure Math. \textbf{24}, 181 (1973).
+\bibitem{BerryKeating} M. V. Berry and J. P. Keating, SIAM Rev. \textbf{41}, 236 (1999). \href{https://doi.org/10.1137/S003614459834749X}{doi:10.1137/S003614459834749X}.
+\bibitem{Shechtman} D. Shechtman, I. Blech, D. Gratias, and J. W. Cahn, Phys. Rev. Lett. \textbf{53}, 1951 (1984). \href{https://doi.org/10.1103/PhysRevLett.53.1951}{doi:10.1103/PhysRevLett.53.1951}.
+\bibitem{Levine} D. Levine and P. J. Steinhardt, Phys. Rev. Lett. \textbf{53}, 2477 (1984). \href{https://doi.org/10.1103/PhysRevLett.53.2477}{doi:10.1103/PhysRevLett.53.2477}.
+\bibitem{HardyWright} G. H. Hardy and E. M. Wright, \emph{An Introduction to the Theory of Numbers}, 6th ed. (Oxford University Press, Oxford, 2008).
+\bibitem{Cramer} H. Cram\'er, Acta Arith. \textbf{2}, 23 (1936). \href{https://doi.org/10.4064/aa-2-1-23-46}{doi:10.4064/aa-2-1-23-46}.
+\bibitem{Macia} E. Maci\'a, Rep. Prog. Phys. \textbf{69}, 397 (2006). \href{https://doi.org/10.1088/0034-4885/69/2/R03}{doi:10.1088/0034-4885/69/2/R03}.
+\bibitem{KratkyPorod} O. Kratky and G. Porod, Recl. Trav. Chim. Pays-Bas \textbf{68}, 1106 (1949). \href{https://doi.org/10.1002/recl.19490681203}{doi:10.1002/recl.19490681203}.
+\bibitem{Montesi} A. Montesi, M. Pasquali, and F. C. MacKintosh, Phys. Rev. E \textbf{69}, 021916 (2004). \href{https://doi.org/10.1103/PhysRevE.69.021916}{doi:10.1103/PhysRevE.69.021916}.
+\bibitem{WCA} J. D. Weeks, D. Chandler, and H. C. Andersen, J. Chem. Phys. \textbf{54}, 5237 (1971). \href{https://doi.org/10.1063/1.1674820}{doi:10.1063/1.1674820}.
+\bibitem{Ermak} D. L. Ermak and J. A. McCammon, J. Chem. Phys. \textbf{69}, 1352 (1978). \href{https://doi.org/10.1063/1.436761}{doi:10.1063/1.436761}.
+\bibitem{Kirkpatrick} S. Kirkpatrick, C. D. Gelatt, and M. P. Vecchi, Science \textbf{220}, 671 (1983). \href{https://doi.org/10.1126/science.220.4598.671}{doi:10.1126/science.220.4598.671}.
+\bibitem{Allen} M. P. Allen and D. J. Tildesley, \emph{Computer Simulation of Liquids}, 2nd ed. (Oxford University Press, Oxford, 2017).
+\bibitem{HardyLittlewood} G. H. Hardy and J. E. Littlewood, Acta Math. \textbf{44}, 1 (1923). \href{https://doi.org/10.1007/BF02403921}{doi:10.1007/BF02403921}.
+\bibitem{AresCastro} S. Ares and M. Castro, Physica A \textbf{360}, 285 (2006). \href{https://doi.org/10.1016/j.physa.2005.05.045}{doi:10.1016/j.physa.2005.05.045}.
+\bibitem{Wolf} M. Wolf, Physica A \textbf{241}, 493 (1997).
+\bibitem{Torquato2018} S. Torquato, G. Zhang, and M. de Courcy-Ireland, J. Stat. Mech. (2018) 093401. \href{https://doi.org/10.1088/1742-5468/aad6be}{doi:10.1088/1742-5468/aad6be}.
+\bibitem{Torquato2019} S. Torquato, G. Zhang, and M. de Courcy-Ireland, J. Phys. A: Math. Theor. \textbf{52}, 135002 (2019).
+\bibitem{KhokhlovKhalatur} A. R. Khokhlov and P. G. Khalatur, Phys. Rev. Lett. \textbf{82}, 3456 (1999). \href{https://doi.org/10.1103/PhysRevLett.82.3456}{doi:10.1103/PhysRevLett.82.3456}.
+\bibitem{Govorun} E. N. Govorun, V. A. Ivanov, A. R. Khokhlov, P. G. Khalatur, A. L. Borovinsky, and A. Yu. Grosberg, Phys. Rev. E \textbf{64}, 040903(R) (2001). \href{https://doi.org/10.1103/PhysRevE.64.040903}{doi:10.1103/PhysRevE.64.040903}.
+\bibitem{Mamasakhlisov} E. Sh. Mamasakhlisov, V. F. Morozov, and M. S. Shahinian, arXiv:cond-mat/9802225 (1998).
+\bibitem{Azevedo} D. L. Azevedo, K. A. T. da Silva, P. W. Mauriz, G. M. Viswanathan, and F. A. Oliveira, Physica A \textbf{445}, 27 (2016). \href{https://doi.org/10.1016/j.physa.2015.08.029}{doi:10.1016/j.physa.2015.08.029}.
+\bibitem{Odijk} T. Odijk, arXiv:1904.09693 (2019).
+\end{thebibliography}
+
+\end{document}
