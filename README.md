@@ -6,6 +6,17 @@ Ruqing Chen — GUT Geoservice Inc., Montreal, Quebec, Canada — <ruqing@hotmai
 
 This repository contains the code, data, and figures reproducing the paper.
 
+> **Version 3.0 (consistency, protocol-dependence, and reporting revision).** No
+> v2.0 datum is altered and no new production ensemble is introduced. v3.0 makes the
+> error-bar convention (mean ± s.e.m.) explicit; records every ensemble's annealing
+> depth (steps and steps/bead) in the figure captions; identifies the correlation
+> length ξ as a protocol-conditioned observable and adds a note-added reporting the
+> deeper-annealed re-measurement (ξ ≈ 4.8×10², ξ/n_gap ≈ 0.39 at N = 10⁴) from
+> follow-up work; states the length–stiffness construction coupling and boundary
+> treatment explicitly; flags the reduced power of the n = 10 R_g comparison; fixes
+> the PDF text layer (ligatures now copy/search correctly); and archives releases on
+> Zenodo with a DOI. Full list in `CHANGELOG.md`.
+
 > **Version 2.0 (mechanism-falsification update).** The local “topological-trap”
 > mechanism proposed in v1.0 has been **tested and falsified** by two new
 > scale-selective surrogate experiments (S4 block shuffle, S5 local scramble). They

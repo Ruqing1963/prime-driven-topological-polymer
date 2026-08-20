@@ -7,7 +7,8 @@ authors:
     affiliation: "GUT Geoservice Inc., Montreal, Quebec, Canada"
     email: ruqing@hotmail.com
 repository-code: "https://github.com/Ruqing1963/prime-driven-topological-polymer"
-version: 2.0.0
+version: 3.0.0
+doi: 10.5281/zenodo.22020688
 date-released: 2026-07-19
 keywords:
   - prime gaps
